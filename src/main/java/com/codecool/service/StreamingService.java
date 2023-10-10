@@ -6,7 +6,6 @@ import com.codecool.model.track.Track;
 import java.util.ArrayList;
 import java.util.Comparator;
 import java.util.List;
-import java.util.stream.Collectors;
 
 public class StreamingService {
 
@@ -21,49 +20,33 @@ public class StreamingService {
     }
 
     public List<Track> searchTrack(String trackName) {
-        System.out.println(" ");
-        System.out.println("Found tracks by search query '" + trackName + "': ");
-        List<Track> resultTracks = new ArrayList<>();
-        for (AudioCollection audioCollection : audioCollections) {
-            for (Track track : audioCollection.getTracks()) {
-                if (track.getName().contains(trackName)) {
-                    resultTracks.add(track);
-                    System.out.println(track.getName());
-                }
-            }
-        }
-        return resultTracks;
+        System.out.println("\nFound tracks by search query '" + trackName + "': ");
+        return audioCollections.stream()
+                .flatMap(audioCollection -> audioCollection.getTracks().stream())
+                .filter(track -> track.getName().contains(trackName))
+                .peek(track -> System.out.println(track.getName()))
+                .toList();
     }
+
     public List<Track> searchTrackByAuthor (String authorName) {
-        System.out.println(" ");
-        System.out.println("Found tracks by Author '" + authorName + "': ");
-        List<Track> resultTracks = new ArrayList<>();
-        for (AudioCollection audioCollection : audioCollections) {
-            for (Track track : audioCollection.getTracks()) {
-                if (track.getAuthor().contains(authorName)) {
-                    resultTracks.add(track);
-                    System.out.println(track.getName());
-                }
-            }
-        }
-        return resultTracks;
+        System.out.println("\nFound tracks by Author '" + authorName + "': ");
+        return audioCollections.stream()
+                .flatMap(audioCollection -> audioCollection.getTracks().stream())
+                .filter(track -> track.getAuthor().contains(authorName))
+                .peek(track -> System.out.println(track.getName()))
+                .toList();
     }
 
     public List<Track> searchTopTracks() {
-        System.out.println(" ");
-        System.out.println("Top 3 tracks:");
+        System.out.println("\nTop 3 tracks:");
         List<Track> resultTracks = audioCollections.stream()
                 .flatMap(audioCollection -> audioCollection.getTracks().stream())
-                .sorted(Comparator.comparingLong(Track::getPlays).reversed())
+                .sorted(Comparator.comparingLong((Track track) -> track.getPlays()).reversed())
                 .limit(3)
-                .collect(Collectors.toList());
+                .toList();
 
         resultTracks.forEach(track -> System.out.println(track.getName()));
 
         return resultTracks;
     }
-
-    // search for a track (song or podcast) by name
-    // list songs/podcast names from an author by name
-    // find the top 3 most listened to tracks
 }
